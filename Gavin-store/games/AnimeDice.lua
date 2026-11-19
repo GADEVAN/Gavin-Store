@@ -1,7 +1,7 @@
 if not game:IsLoaded() then game.Loaded:Wait() end 
 
 -- PATH BASE LU
-local BASE = "https://raw.githubusercontent.com/GADEVAN/Gavin-Store/main/Gavin-store/games/" 
+local BASE = "https://raw.githubusercontent.com/GADEVAN/Gavin-Store/refs/heads/main/Gavin-store/games/"  
 local DISCORD = "discord.gg/gavinstore" 
 
 -- NAMA GAME (TANPA SPASI BIAR AMAN)

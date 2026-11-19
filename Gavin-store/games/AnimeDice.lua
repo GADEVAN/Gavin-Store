@@ -1,14 +1,20 @@
--- GAVIN STORE | Anime Dice Auto Farm
+-- GAVIN STORE | Anime Dice (Safe UI Mode)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local VirtualUser = game:GetService("VirtualUser")
 local LocalPlayer = Players.LocalPlayer
+
+-- Fungsi biar GUI ga kehapus sama Anti-Cheat
+local function getGui()
+    local a = pcall(function() return game:GetService("CoreGui") end)
+    if a then return game:GetService("CoreGui") end
+    local b = pcall(function() return gethui() end)
+    if b then return gethui() end
+    return LocalPlayer:WaitForChild("PlayerGui")
+end
 
 local Config = {
     AutoRoll = false,
     AutoCollect = false,
-    AutoRebirth = false,
-    AutoUpgrade = false,
     RollDelay = 0.5
 }
 
@@ -16,10 +22,10 @@ local Config = {
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "GavinStore_AnimeDice"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Parent = getGui()
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 220, 0, 280)
+MainFrame.Size = UDim2.new(0, 220, 0, 200)
 MainFrame.Position = UDim2.new(0, 20, 0, 100)
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 MainFrame.BorderSizePixel = 0
@@ -65,14 +71,6 @@ end
 
 CreateToggle("AutoRoll", 1)
 CreateToggle("AutoCollect", 2)
-CreateToggle("AutoRebirth", 3)
-CreateToggle("AutoUpgrade", 4)
-
-local function ClickGui(btn)
-    if btn and btn:IsA("GuiButton") then
-        btn:Activate()
-    end
-end
 
 -- Loop Script
 task.spawn(function()
@@ -80,7 +78,7 @@ task.spawn(function()
         if Config.AutoRoll then
             local RollBtn = LocalPlayer.PlayerGui:FindFirstChild("ROLL", true) 
             if RollBtn and (RollBtn:IsA("TextButton") or RollBtn:IsA("ImageButton")) then
-                ClickGui(RollBtn)
+                RollBtn:Activate()
             end
         end
         
@@ -93,16 +91,6 @@ task.spawn(function()
                     end
                 end
             end
-        end
-
-        if Config.AutoRebirth then
-            local RebirthBtn = LocalPlayer.PlayerGui:FindFirstChild("Rebirth", true)
-            if RebirthBtn then ClickGui(RebirthBtn) end
-        end
-        
-        if Config.AutoUpgrade then
-            local UpgradeBtn = LocalPlayer.PlayerGui:FindFirstChild("Upgrades", true)
-            if UpgradeBtn then ClickGui(UpgradeBtn) end
         end
     end
 end)

@@ -1,7 +1,7 @@
 -- GAVIN STORE | Anime Dice Auto Farm
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
+local VirtualUser = game:GetService("VirtualUser")
 local LocalPlayer = Players.LocalPlayer
 
 local Config = {
@@ -68,53 +68,41 @@ CreateToggle("AutoCollect", 2)
 CreateToggle("AutoRebirth", 3)
 CreateToggle("AutoUpgrade", 4)
 
--- Logic / Simulasi Klik
-local VirtualUser = game:GetService("VirtualUser")
-
-local function FireClick()
-    VirtualUser:Button1Down(Vector2.new(0,0), workspace.CurrentCamera)
-    VirtualUser:Button1Up(Vector2.new(0,0), workspace.CurrentCamera)
+local function ClickGui(btn)
+    if btn and btn:IsA("GuiButton") then
+        btn:Activate()
+    end
 end
 
 -- Loop Script
 task.spawn(function()
     while task.wait(Config.RollDelay) do
         if Config.AutoRoll then
-            -- Cari tombol Roll (biasanya di UI atau trigger via keyboard)
-            -- Simulasi pencetan tombol 'R' atau spasi
-            local RollBtn = LocalPlayer.PlayerGui:FindFirstChild("Roll", true)
-            if RollBtn and RollBtn:IsA("TextButton") then
-                RollBtn:Click()
-            else
-                -- Fallback: pake VirtualUser klik tengah layar
-                FireClick()
+            local RollBtn = LocalPlayer.PlayerGui:FindFirstChild("ROLL", true) 
+            if RollBtn and (RollBtn:IsA("TextButton") or RollBtn:IsA("ImageButton")) then
+                ClickGui(RollBtn)
             end
         end
         
         if Config.AutoCollect then
-            -- Logic auto collect (mencari drop item)
-            for _, v in pairs(workspace:GetChildren()) do
-                if v:IsA("Model") and (v.Name:find("Drop") or v.Name:find("Gem") or v.Name:find("Coin")) then
-                    LocalPlayer.Character.HumanoidRootPart.CFrame = v:GetPivot()
-                    task.wait(0.1)
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("BasePart") and (v.Name:find("Drop") or v.Name:find("Gem") or v.Name:find("Coin")) then
+                    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                        LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
+                        task.wait(0.05)
+                    end
                 end
             end
         end
 
         if Config.AutoRebirth then
             local RebirthBtn = LocalPlayer.PlayerGui:FindFirstChild("Rebirth", true)
-            if RebirthBtn and RebirthBtn:IsA("TextButton") then
-                RebirthBtn:Click()
-            end
+            if RebirthBtn then ClickGui(RebirthBtn) end
         end
         
         if Config.AutoUpgrade then
             local UpgradeBtn = LocalPlayer.PlayerGui:FindFirstChild("Upgrades", true)
-            if UpgradeBtn and UpgradeBtn:IsA("TextButton") then
-                UpgradeBtn:Click()
-            end
+            if UpgradeBtn then ClickGui(UpgradeBtn) end
         end
     end
 end)
-
-print("[GAVIN STORE] Anime Dice Loaded Successfully.")

@@ -1,97 +1,108 @@
-if not game:IsLoaded() then game.Loaded:Wait() end 
+-- GAVIN STORE | Anime Dice Auto Farm
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local VirtualUser = game:GetService("VirtualUser")
+local LocalPlayer = Players.LocalPlayer
 
--- PATH BASE LU
-local BASE = "https://raw.githubusercontent.com/GADEVAN/Gavin-Store/refs/heads/main/Gavin-store/games/"  
-local DISCORD = "discord.gg/gavinstore" 
+local Config = {
+    AutoRoll = false,
+    AutoCollect = false,
+    AutoRebirth = false,
+    AutoUpgrade = false,
+    RollDelay = 0.5
+}
 
--- NAMA GAME (TANPA SPASI BIAR AMAN)
-local GAMES = { 
-    [10436530264] = "BuildAnAntEmpire", 
-    [10418224975] = "TNTMining", 
-    [10684750879] = "LootToForge", 
-    [10765091041] = "OpenSeaForAnimals", 
-    [66654135] = "MurderMystery2", 
-    [1202096104] = "DrivingEmpire", 
-    [9534705677] = "SniperArena", 
-    [6739698191] = "ViolenceDistrict", 
-    [10708913337] = "AnimeDice", -- UDAH GW UBAH JADI TANPA SPASI
-    [10035204815] = "RideAPet",
-    [10031505426] = "AirDropArena", 
-    [7633926880] = "BloxStrike", 
-    [10765298801] = "StoneSkipping", 
-    [10765288803] = "BreakandStealanEgg", 
-    [10765012427] = "BuildthePyramid", 
-} 
+-- GUI Setup
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "GavinStore_AnimeDice"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
-local StarterGui = game:GetService("StarterGui") 
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 220, 0, 280)
+MainFrame.Position = UDim2.new(0, 20, 0, 100)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
 
-local function Notify(text, detail) 
-    warn("[GAVIN STORE] " .. text, detail or "") 
-    task.spawn(function() 
-        for _ = 1, 20 do 
-            local shown = pcall(StarterGui.SetCore, StarterGui, "SendNotification", { 
-                Title = "GAVIN STORE", 
-                Text = text, 
-                Duration = 10, 
-            }) 
-            if shown then return end 
-            task.wait(0.5) 
-        end 
-    end) 
-end 
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+Title.BorderSizePixel = 0
+Title.Text = "GAVIN STORE | Anime Dice"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 14
+Title.Parent = MainFrame
 
-local function LooksLikeScript(body) 
-    if type(body) ~= "string" or body == "" then return false end 
-    local head = body:sub(1, 80) 
-    return not (head:find("^%s*<") or head:find("^%d%d%d:")) 
-end 
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Padding = UDim.new(0, 8)
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIListLayout.Parent = MainFrame
 
-local function FetchOnce(url) 
-    local ok, body = pcall(function() return game:HttpGet(url) end) 
-    if ok and LooksLikeScript(body) then return body end 
-    local send = request or http_request or (syn and syn.request) or (http and http.request) 
-    if not send then return nil, ok and "bad reply from HttpGet" or tostring(body) end 
-    local sent, reply = pcall(send, { Url = url, Method = "GET" }) 
-    if not sent or type(reply) ~= "table" then return nil, tostring(reply) end 
-    if reply.StatusCode ~= 200 then return nil, "HTTP " .. tostring(reply.StatusCode) end 
-    if not LooksLikeScript(reply.Body) then return nil, "bad reply body" end 
-    return reply.Body 
-end 
-
-local function Fetch(url) 
-    local why 
-    for attempt = 1, 3 do 
-        local body, err = FetchOnce(url) 
-        if body then return body end 
-        why = err 
-        if attempt < 3 then task.wait(1) end 
-    end 
-    return nil, why 
-end 
-
-local name = GAMES[game.GameId] 
-if not name then 
-    Notify("Game not supported. Join " .. DISCORD .. " for the list.") 
-    return 
-end 
-
--- KARENA UDAH TANPA SPASI, KITA LANGSUNG TEMPEL NAMANYA
-local fileName = name .. ".lua" 
-local source, why = Fetch(BASE .. fileName) 
-if not source then 
-    Notify("Failed to download " .. name .. ". Check net or join " .. DISCORD, why) 
-    return 
-end 
-
-local chunk, compileErr = loadstring(source) 
-if not chunk then 
-    Notify(name .. " failed to compile: " .. tostring(compileErr) .. ". Ask in " .. DISCORD) 
-    return 
-end 
-
-local ok, trace = xpcall(chunk, function(err) 
-    return debug.traceback(tostring(err), 2) 
-end) 
-if not ok then 
-    Notify(name .. " error: " .. tostring(trace):match("^[^\n]*") .. ". Ask in " .. DISCORD, "\n" .. tostring(trace)) 
+local function CreateToggle(name, layoutOrder)
+    local Btn = Instance.new("TextButton")
+    Btn.Size = UDim2.new(0.9, 0, 0, 35)
+    Btn.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+    Btn.BorderSizePixel = 0
+    Btn.Text = name .. ": OFF"
+    Btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    Btn.Font = Enum.Font.Gotham
+    Btn.TextSize = 13
+    Btn.LayoutOrder = layoutOrder
+    Btn.Parent = MainFrame
+    
+    Btn.MouseButton1Click:Connect(function()
+        Config[name] = not Config[name]
+        Btn.Text = name .. ": " .. (Config[name] and "ON" or "OFF")
+        Btn.BackgroundColor3 = Config[name] and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(50, 50, 60)
+    end)
+    return Btn
 end
+
+CreateToggle("AutoRoll", 1)
+CreateToggle("AutoCollect", 2)
+CreateToggle("AutoRebirth", 3)
+CreateToggle("AutoUpgrade", 4)
+
+local function ClickGui(btn)
+    if btn and btn:IsA("GuiButton") then
+        btn:Activate()
+    end
+end
+
+-- Loop Script
+task.spawn(function()
+    while task.wait(Config.RollDelay) do
+        if Config.AutoRoll then
+            local RollBtn = LocalPlayer.PlayerGui:FindFirstChild("ROLL", true) 
+            if RollBtn and (RollBtn:IsA("TextButton") or RollBtn:IsA("ImageButton")) then
+                ClickGui(RollBtn)
+            end
+        end
+        
+        if Config.AutoCollect then
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("BasePart") and (v.Name:find("Drop") or v.Name:find("Gem") or v.Name:find("Coin")) then
+                    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                        LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
+                        task.wait(0.05)
+                    end
+                end
+            end
+        end
+
+        if Config.AutoRebirth then
+            local RebirthBtn = LocalPlayer.PlayerGui:FindFirstChild("Rebirth", true)
+            if RebirthBtn then ClickGui(RebirthBtn) end
+        end
+        
+        if Config.AutoUpgrade then
+            local UpgradeBtn = LocalPlayer.PlayerGui:FindFirstChild("Upgrades", true)
+            if UpgradeBtn then ClickGui(UpgradeBtn) end
+        end
+    end
+end)

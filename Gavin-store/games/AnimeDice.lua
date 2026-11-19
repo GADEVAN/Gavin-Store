@@ -1,16 +1,7 @@
--- GAVIN STORE | Anime Dice (Safe UI Mode)
+-- GAVIN STORE | Anime Dice (Final Working Version)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
-
--- Fungsi biar GUI ga kehapus sama Anti-Cheat
-local function getGui()
-    local a = pcall(function() return game:GetService("CoreGui") end)
-    if a then return game:GetService("CoreGui") end
-    local b = pcall(function() return gethui() end)
-    if b then return gethui() end
-    return LocalPlayer:WaitForChild("PlayerGui")
-end
 
 local Config = {
     AutoRoll = false,
@@ -18,11 +9,13 @@ local Config = {
     RollDelay = 0.5
 }
 
--- GUI Setup
+print("[GAVIN STORE] Memulai inisialisasi UI...")
+
+-- 1. BIKIN UI (Pake PlayerGui kayak kotak merah tadi)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "GavinStore_AnimeDice"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = getGui()
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 220, 0, 200)
@@ -72,7 +65,9 @@ end
 CreateToggle("AutoRoll", 1)
 CreateToggle("AutoCollect", 2)
 
--- Loop Script
+print("[GAVIN STORE] UI Berhasil dibuat!")
+
+-- 2. LOGIKA LOOPING
 task.spawn(function()
     while task.wait(Config.RollDelay) do
         if Config.AutoRoll then

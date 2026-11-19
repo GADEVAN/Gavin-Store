@@ -1,7 +1,7 @@
 if not game:IsLoaded() then game.Loaded:Wait() end 
 
 -- GANTI "USERNAME" SAMA USERNAME GITHUB LU NANTI
-local BASE = "https://raw.githubusercontent.com/USERNAME/Gavin-Store/main/games/" 
+local BASE = "https://raw.githubusercontent.com/GADEVAN/Gavin-Store/main/Gavin-store/games/"  
 local DISCORD = "discord.gg/gavinstore" 
 
 local GAMES = { 

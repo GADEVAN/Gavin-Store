@@ -1,17 +1,16 @@
--- GAVIN STORE | Anime Dice (Final Working Version)
+-- GAVIN STORE | Anime Dice (Auto Clicker & Farm)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local VirtualUser = game:GetService("VirtualUser")
 local LocalPlayer = Players.LocalPlayer
 
 local Config = {
     AutoRoll = false,
     AutoCollect = false,
-    RollDelay = 0.5
+    RollDelay = 0.1
 }
 
-print("[GAVIN STORE] Memulai inisialisasi UI...")
-
--- 1. BIKIN UI (Pake PlayerGui kayak kotak merah tadi)
+-- 1. BIKIN UI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "GavinStore_AnimeDice"
 ScreenGui.ResetOnSpawn = false
@@ -65,19 +64,23 @@ end
 CreateToggle("AutoRoll", 1)
 CreateToggle("AutoCollect", 2)
 
-print("[GAVIN STORE] UI Berhasil dibuat!")
-
 -- 2. LOGIKA LOOPING
 task.spawn(function()
     while task.wait(Config.RollDelay) do
         if Config.AutoRoll then
+            -- Simulasi pencet tombol Space (biasanya buat roll)
             local RollBtn = LocalPlayer.PlayerGui:FindFirstChild("ROLL", true) 
             if RollBtn and (RollBtn:IsA("TextButton") or RollBtn:IsA("ImageButton")) then
-                RollBtn:Activate()
+                RollBtn:Activate() -- Coba pencet UI
+            else
+                -- Kalau UI gagal, klik tengah layar
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton1(Vector2.new(workspace.CurrentCamera.ViewportSize.X/2, workspace.CurrentCamera.ViewportSize.Y/2))
             end
         end
         
         if Config.AutoCollect then
+            -- Teleport ke item drop (Gem/Coin/Drop)
             for _, v in pairs(workspace:GetDescendants()) do
                 if v:IsA("BasePart") and (v.Name:find("Drop") or v.Name:find("Gem") or v.Name:find("Coin")) then
                     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
